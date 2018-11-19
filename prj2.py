@@ -39,22 +39,33 @@ def phase1():
                 
         #the term file format
                 for i in title:
-                    abuni = re.sub('[^A-Za-z0-9\\_\\-]+','', i)
+                    word = '&#'                      
+                    for c in word:
+                        if c in i:
+                            regex1 = re.sub('[^A-Za-z\\_\\-]+','', i) 
+                        else:             
+                            regex1 = re.sub('[^A-Za-z0-9\\_\\-]+','', i)
                     
-                    if len(abuni) > 2:
-                        abuni = abuni.lower()
+                    if len(regex1) > 2:
+                        regex1 = regex1.lower()
                         
-                        a = abuni + ":"
+                        a = regex1 + ":"
                         info = a+ aid 
                         terms.write(str(info)+  "\n")
                 desc = ad[12][:-6]
                 desc = desc.split(" ")            
                 for k in desc:
-                    tatenda = re.sub('[^A-Za-z0-9\\_\\-]+','', k)
-                    if len(tatenda) > 2:
-                        tatenda = tatenda.lower()
+                    word = '&#'                  
+                    for b in word:
+                        if b in k:                    
+                            regex2 = re.sub('[^A-Za-z\\_\\-]+','', k)
+                        else:
+                            regex2 = re.sub('[^A-Za-z0-9\\_\\-]+','', k)
+                            
+                    if len(regex2) > 2:
+                        regex2 = regex2.lower()
                         
-                        t = tatenda + ":"
+                        t = regex2 + ":"
                         info2 = t + aid 
                         terms.write(str(info2)+  "\n")
                         
