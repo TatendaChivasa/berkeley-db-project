@@ -19,7 +19,7 @@ def phase1():
             ad = line.split(">")
             
             if ad[0] == '<ad':  
-                aid = ad[2][0:10]
+                aid = ad[2][0:-5]
             # the ads file formats
                 expr = aid + ':' 
                 ads.write(expr + line+ " ")
@@ -39,75 +39,46 @@ def phase1():
                 
         #the term file format
                 for i in title:
-                    word = '&#'
-                    #-------------------------------------------                                      
-                    result = (re.search(r'(\w+)\.{3,}', i)) 
-                    if result == None:
-                        for c in word:
-                            if c in i:
-                                regex1 = re.sub('[^A-Za-z\\_\\-]+','', i) 
-                            else:             
-                                regex1 = re.sub('[^A-Za-z0-9\\_\\-]+','', i)
-                        if len(regex1) > 2:
-                            regex1 = regex1.lower()
-                            
-                            a = regex1 + ":"
-                            info = a+ aid 
-                            terms.write(str(info)+  "\n")                        
-                    else:                                                             
-                        res = re.split("\.+", i)                        
-                        for y in res:
-                            for c in word:
-                                if c in y:
-                                    regex1 = re.sub('[^A-Za-z\\_\\-]+','', y) 
-                                else:             
-                                    regex1 = re.sub('[^A-Za-z0-9\\_\\-]+','', y)
-                                    
-                            if len(regex1) > 2:
-                                regex1 = regex1.lower()
-                                
-                                a = regex1 + ":"
-                                info = a+ aid 
-                                terms.write(str(info)+  "\n")                            
+                    regex1 = re.sub('&#\d\d\d;','',i)
+                    regex1 = re.sub('[^A-Za-z0-9\\_\\-]',' ', regex1)                                                        
+                    if len(regex1) > 2:
+                        if (' ' in  regex1):
+                            regex1 = regex1.split(' ')
+                            for reg in regex1:
+                                if len(reg) > 2:
+                                    reg = reg.lower()                          
+                                    t = reg + ":"
+                                    info = t + aid 
+                                    terms.write(str(info)+  "\n")                        
+                        else:
+                            regex1 = regex1.lower()                          
+                            t = regex1 + ":"
+                            info = t + aid 
+                            terms.write(str(info)+  "\n")                                              
                          #--------------------------------------       
                    
                     
                     
                 desc = ad[12][:-6]
                 desc = desc.split(" ")            
-                for k in desc:
-                    word = '&#'
-                    #------------------------------------                   
-                    result1 = (re.search(r'(\w+)\.{3,}', k)) 
-                    if result1 == None:
-                        for b in word:
-                            if b in k:                    
-                                regex2 = re.sub('[^A-Za-z\\_\\-]+','', k)
-                            else:
-                                regex2 = re.sub('[^A-Za-z0-9\\_\\-]+','', k)
-                                
-                        if len(regex2) > 2:
-                            regex2 = regex2.lower()
-                            
+                for k in desc:                   
+                    regex2 = re.sub('&#\d\d\d;','',k)
+                    regex2 = re.sub('[^A-Za-z0-9\\_\\-]',' ', regex2) 
+                    if len(regex2) > 2:
+                        if (' ' not in regex2):
+                            regex2 = regex2.lower()                          
                             t = regex2 + ":"
                             info2 = t + aid 
-                            terms.write(str(info2)+  "\n")                        
-                    else:                        
-                        res1 = re.split("\.+", k)
-                        for y1 in res1:                           
-                            for c in word:
-                                if c in y1:
-                                    regex2 = re.sub('[^A-Za-z\\_\\-]+','', y1) 
-                                else:             
-                                    regex2 = re.sub('[^A-Za-z0-9\\_\\-]+','', y1) 
-                                
-                            if len(regex2) > 2:
-                                regex2 = regex2.lower()
-                                
-                                t = regex2 + ":"
-                                info2 = t + aid 
-                                terms.write(str(info2)+  "\n")                                 
-               
+                            terms.write(str(info2)+  "\n")                             
+                                                 
+                        else:                                                    
+                            regex2 = regex2.split(' ')
+                            for reg1 in regex2:
+                                if len(reg1) > 2:
+                                    reg1 = reg1.lower()                          
+                                    t = reg1 + ":"
+                                    info2 = t + aid 
+                                    terms.write(str(info2)+  "\n")                               
                     #-----------------------------------------------
                     
                         
@@ -133,23 +104,99 @@ def phase1():
     prices.close()
     pdates.close()
     ads.close()
-def phase2():  
-    # hash index for the terms
-    cmd = "sort<terms.txt -u > terms2.txt"
-    subprocess.call(cmd, shell=True)    
     
-    # B+ index for the prices
-    cmd = "sort<prices.txt  > price2.txt"
-    subprocess.call(cmd, shell=True)          
-
-    #B+ index for the pdates
-    cmd = "sort<pdates.txt  > pdates2.txt"
+def phase2():  
+    # B+ index for the terms
+    DB_File = "te.idx"
+    database = db.DB()
+    #database.set_flags(db.DB_DUP) 
+    database.open(DB_File,None, db.DB_BTREE, db.DB_CREATE)
+    curs = database.cursor()
+    cmd = "sort<terms.txt -u > terms2.txt"
     subprocess.call(cmd, shell=True) 
     
-    #B+ index for the ads
-    cmd = "sort<ads.txt  > ads2.txt"
-    subprocess.call(cmd, shell=True)
+    term = open("terms2.txt", 'r')
+    listterms = []
+    for i in term:
+        ad = i.split(":")  
+        listterms.append(ad)    
+    for t in range(len(listterms)):
+        tkey = listterms[t][0]
+        tval = listterms[t][1]
+        t += 1
+        
+        database.put(bytes(tkey, "utf 8"), bytes(tval, "utf-8"))
+    curs.close()
+    database.close()    
+   
+    # B+ index for the prices
+    DB_File = "pr.idx"
+    database = db.DB()
+    database.set_flags(db.DB_DUP) 
+    database.open(DB_File,None, db.DB_BTREE, db.DB_CREATE)
+    curs = database.cursor()
+    cmd1 = "sort<prices.txt  > price2.txt"
+    subprocess.call(cmd1, shell=True)          
+
+    price = open("price2.txt", 'r')
+    plistt = []
+    for i in price:
+        ad1 = i.split(":")  
+        plistt.append(ad1)    
+    for k in range(len(plistt)):
+        kkey = plistt[k][0]
+        kval = plistt[k][1]
+        k += 1
+        
+        database.put(bytes(kkey, "utf 8"), bytes(kval, "utf-8"))
+    curs.close()
+    database.close()    
     
+    #B+ index for the pdates
+    DB_File = "da.idx"
+    database = db.DB()
+    database.set_flags(db.DB_DUP) 
+    database.open(DB_File,None, db.DB_BTREE, db.DB_CREATE)  
+    curs = database.cursor()
+    cmd2 = "sort<pdates.txt  > pdates2.txt"
+    subprocess.call(cmd2, shell=True) 
+    
+    pdate = open("pdates2.txt", 'r')
+    datelist = []
+    for i in pdate:
+        ad2 = i.split(":")  
+        datelist.append(ad2)    
+    for p in range(len(datelist)):
+        pkey = datelist[p][0]
+        pval = datelist[p][1]
+        p += 1
+        
+        database.put(bytes(pkey, "utf 8"), bytes(pval, "utf-8"))
+    curs.close()
+    database.close()       
+    
+    #hash index for the ads
+    DB_File = "ad.idx"
+    database = db.DB()
+    #database.set_flags(db.DB_DUP)
+    database.open(DB_File,None, db.DB_HASH, db.DB_CREATE)       
+    cmd3 = "sort<ads.txt  > ads2.txt"
+    subprocess.call(cmd3, shell=True)
+    
+    pdate = open("pdates2.txt", 'r')
+    adlist = []
+    for i in pdate:
+        ad3 = i.split(":")  
+        datelist.append(ad3)    
+    for m in range(len(adlist)):
+        mkey = adlist[m][0]
+        mval = adlist[m][1]
+        m += 1  
+        
+        database.put(bytes(mkey, "utf 8"), bytes(mval, "utf-8"))
+    curs.close()
+    database.close()        
+     
 def main():
     phase1()
     phase2()
