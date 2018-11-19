@@ -39,35 +39,77 @@ def phase1():
                 
         #the term file format
                 for i in title:
-                    word = '&#'                      
-                    for c in word:
-                        if c in i:
-                            regex1 = re.sub('[^A-Za-z\\_\\-]+','', i) 
-                        else:             
-                            regex1 = re.sub('[^A-Za-z0-9\\_\\-]+','', i)
+                    word = '&#'
+                    #-------------------------------------------                                      
+                    result = (re.search(r'(\w+)\.{3,}', i)) 
+                    if result == None:
+                        for c in word:
+                            if c in i:
+                                regex1 = re.sub('[^A-Za-z\\_\\-]+','', i) 
+                            else:             
+                                regex1 = re.sub('[^A-Za-z0-9\\_\\-]+','', i)
+                        if len(regex1) > 2:
+                            regex1 = regex1.lower()
+                            
+                            a = regex1 + ":"
+                            info = a+ aid 
+                            terms.write(str(info)+  "\n")                        
+                    else:                                                             
+                        res = re.split("\.+", i)                        
+                        for y in res:
+                            for c in word:
+                                if c in y:
+                                    regex1 = re.sub('[^A-Za-z\\_\\-]+','', y) 
+                                else:             
+                                    regex1 = re.sub('[^A-Za-z0-9\\_\\-]+','', y)
+                                    
+                            if len(regex1) > 2:
+                                regex1 = regex1.lower()
+                                
+                                a = regex1 + ":"
+                                info = a+ aid 
+                                terms.write(str(info)+  "\n")                            
+                         #--------------------------------------       
+                   
                     
-                    if len(regex1) > 2:
-                        regex1 = regex1.lower()
-                        
-                        a = regex1 + ":"
-                        info = a+ aid 
-                        terms.write(str(info)+  "\n")
+                    
                 desc = ad[12][:-6]
                 desc = desc.split(" ")            
                 for k in desc:
-                    word = '&#'                  
-                    for b in word:
-                        if b in k:                    
-                            regex2 = re.sub('[^A-Za-z\\_\\-]+','', k)
-                        else:
-                            regex2 = re.sub('[^A-Za-z0-9\\_\\-]+','', k)
+                    word = '&#'
+                    #------------------------------------                   
+                    result1 = (re.search(r'(\w+)\.{3,}', k)) 
+                    if result1 == None:
+                        for b in word:
+                            if b in k:                    
+                                regex2 = re.sub('[^A-Za-z\\_\\-]+','', k)
+                            else:
+                                regex2 = re.sub('[^A-Za-z0-9\\_\\-]+','', k)
+                                
+                        if len(regex2) > 2:
+                            regex2 = regex2.lower()
                             
-                    if len(regex2) > 2:
-                        regex2 = regex2.lower()
-                        
-                        t = regex2 + ":"
-                        info2 = t + aid 
-                        terms.write(str(info2)+  "\n")
+                            t = regex2 + ":"
+                            info2 = t + aid 
+                            terms.write(str(info2)+  "\n")                        
+                    else:                        
+                        res1 = re.split("\.+", k)
+                        for y1 in res1:                           
+                            for c in word:
+                                if c in y1:
+                                    regex2 = re.sub('[^A-Za-z\\_\\-]+','', y1) 
+                                else:             
+                                    regex2 = re.sub('[^A-Za-z0-9\\_\\-]+','', y1) 
+                                
+                            if len(regex2) > 2:
+                                regex2 = regex2.lower()
+                                
+                                t = regex2 + ":"
+                                info2 = t + aid 
+                                terms.write(str(info2)+  "\n")                                 
+               
+                    #-----------------------------------------------
+                    
                         
         # the pdates file format
                 for p in datte:
@@ -91,7 +133,6 @@ def phase1():
     prices.close()
     pdates.close()
     ads.close()
-    
 def phase2():  
     # hash index for the terms
     cmd = "sort<terms.txt -u > terms2.txt"
