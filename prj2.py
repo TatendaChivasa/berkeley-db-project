@@ -109,7 +109,7 @@ def phase2():
     # B+ index for the terms
     DB_File = "te.idx"
     database = db.DB()
-    #database.set_flags(db.DB_DUP) 
+    database.set_flags(db.DB_DUP) 
     database.open(DB_File,None, db.DB_BTREE, db.DB_CREATE)
     curs = database.cursor()
     cmd = "sort<terms.txt -u > terms2.txt"
@@ -135,7 +135,7 @@ def phase2():
     database.set_flags(db.DB_DUP) 
     database.open(DB_File,None, db.DB_BTREE, db.DB_CREATE)
     curs = database.cursor()
-    cmd1 = "sort<prices.txt  > price2.txt"
+    cmd1 = "sort<prices.txt -u > price2.txt"
     subprocess.call(cmd1, shell=True)          
 
     price = open("price2.txt", 'r')
@@ -158,7 +158,7 @@ def phase2():
     database.set_flags(db.DB_DUP) 
     database.open(DB_File,None, db.DB_BTREE, db.DB_CREATE)  
     curs = database.cursor()
-    cmd2 = "sort<pdates.txt  > pdates2.txt"
+    cmd2 = "sort<pdates.txt -u > pdates2.txt"
     subprocess.call(cmd2, shell=True) 
     
     pdate = open("pdates2.txt", 'r')
@@ -180,7 +180,7 @@ def phase2():
     database = db.DB()
     #database.set_flags(db.DB_DUP)
     database.open(DB_File,None, db.DB_HASH, db.DB_CREATE)       
-    cmd3 = "sort<ads.txt  > ads2.txt"
+    cmd3 = "sort<ads.txt -u > ads2.txt"
     subprocess.call(cmd3, shell=True)
     
     ads = open("ads2.txt", 'r')
@@ -199,105 +199,10 @@ def phase2():
     curs.close()
     database.close()  
     
-def phase3():
-    
-    user = input("enter your query: ").lower().replace(" ", "")
-    #print(user)
 
-    #start_date_equal = re.match("date=", user) 
-    #if start_date_equal != None:
-    for x2 in re.finditer('date=', user):
-        #print(start_date_equal)
-        print(x2.start(), x2.end(), x2.group())  
-    #end_date_equal = user.find("date") or user.find("price") or user.find("location") or 21 
-    #end_date_equal = start_date_equal + 16
-    #date_equal = user[start_date_equal : end_date_equal]
-    
-    
-    start_date_greater = re.match("date>", user)
-    if start_date_greater != None:
-        print(start_date_greater)
-    #end_date_greater = start_date_greater + 16
-    #date_greater = user[start_date_greater : end_date_greater]
-    
-    
-    #if user.find("date>=") and len == 6
-    #start_date_greater_or_equal = re.match("date>=", user)
-    for x1 in re.finditer('date>=', user):
-    #if start_date_greater_or_equal != None:
-        print(start_date_greater_or_equal)
-    #end_date_greater_or_equal = start_date_greater_or_equal + 16
-    #date_greater_or_equal = user[start_date_greater_or_equal : end_date_greater_or_equal]
-    
-    start_date_less = re.match("date<", user)
-    if start_date_less != None:
-        print(start_date_less)
-    # = start_date_less + 16
-    #date_less = user[start_date_less : end_date_less] 
-    
-
-    start_date_less_or_equal = re.match("date<=", user)
-    if start_date_less_or_equal != None:
-        print(start_date_less_or_equal)
-    #end_date_less_or_equal = start_date_less_or_equal + 16
-    #date_less_or_equal = user[start_date_less_or_equal : end_date_less_or_equal] 
-    
-    
-    #start_price_equal = re.match("price=", user)
-    #if start_price_equal != None:
-        #print(start_price_equal)
-        
-    for x in re.finditer('price=', user):
-        print(x.start(), x.end(), x.group())        
-    #end_price_equal = start_price_equal + 8
-    #price_equal = user[start_price_equal : end_price_equal]
-    
-    
-    
-    for x1 in re.finditer('price>', user):
-        print(x1.start(), x1.end(), x1.group())   
-        #start_price_greater = re.match("price>", user)
-    #if start_price_greater != None:
-     #   print(start_price_greater)
-    #end_price_greater = start_price_greater + 8
-    #price_greater = user[start_price_greater : end_price_greater]
-    
-    
-    for x2 in re.finditer('price>=', user):
-        print(x2.start(), x2.end(), x2.group())       
-    #start_price_greater_or_equal = re.match("price>=", user)
-    #if start_price_greater_or_equal != None:
-     #   print(start_price_greater_or_equal)
-    #end_price_greater_or_equal = start_price_greater_or_equal + 9
-    #price_greater_or_equal = user[start_price_greater_or_equal : end_price_greater_or_equal]  
-    
-    
-    start_price_less = re.match("price<", user)
-    if start_price_less != None:
-        print(start_price_less)
-    #end_price_less = start_price_less + 8
-    #price_less = user[start_price_less : end_price_less]
-    
-
-    start_price_less_or_equal = re.match("price<=", user)
-    if start_price_less_or_equal != None:
-        print(start_price_less_or_equal)
-    #end_price_less_or_equal = start_price_less_or_equal + 9
-    #price_less_or_equal = user[start_price_less_or_equal : end_price_less_or_equal]
-    
-
-    #The user should be able to change the output format to full record by typing "output=full" and back to id and title only using "output=brief"
-    
-    #first query returns all records that have camera as a word in the title or description fields. 
-    
-    #The second query returns all records that have a term starting with camera% in the title or description fields
-    
-    #put the user input in a list and but list could get really long 
-     
 def main():
     phase1()
     phase2()
-    #phase3()
 
 if __name__ == "__main__":
     main()
