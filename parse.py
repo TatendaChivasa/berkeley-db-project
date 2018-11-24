@@ -50,3 +50,7 @@ def captureRest(text):
         querylist.append(i)
         
 main() 
+'''
+test with:
+  date<=2018/11/07  date>=2018/11/05 price > 20 price < 40  location = edmonton cat=art-collectibles camera
+ '''
