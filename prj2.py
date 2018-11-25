@@ -40,6 +40,7 @@ def phase1():
         #the term file format
                 for i in title:
                     regex1 = re.sub('&#\d\d\d;','',i)
+                    regex1 = re.sub('&amp','',regex1)
                     regex1 = re.sub('[^A-Za-z0-9\\_\\-]',' ', regex1)                                                        
                     if len(regex1) > 2:
                         if (' ' in  regex1):
@@ -63,6 +64,7 @@ def phase1():
                 desc = desc.split(" ")            
                 for k in desc:                   
                     regex2 = re.sub('&#\d\d\d;','',k)
+                    regex2 = re.sub('&amp','',regex2)
                     regex2 = re.sub('[^A-Za-z0-9\\_\\-]',' ', regex2) 
                     if len(regex2) > 2:
                         if (' ' not in regex2):
