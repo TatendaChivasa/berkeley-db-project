@@ -98,7 +98,9 @@ def phase1():
                     rest = aid + ',' + category + ',' + city
                     q = n + ":"
                     info3 = q + rest            
-                    prices.write( str(info3)+ "\n")
+                    prices.write( (str(info3).rjust(50, ' '))+ "\n")
+                    #prices.write(str(info3) + "\n")
+                   
                 
     terms.close()
     prices.close()
@@ -135,7 +137,7 @@ def phase2():
     database.set_flags(db.DB_DUP) 
     database.open(DB_File,None, db.DB_BTREE, db.DB_CREATE)
     curs = database.cursor()
-    cmd1 = "sort<prices.txt -u > price2.txt"
+    cmd1 = "sort -g <prices.txt >price2.txt"
     subprocess.call(cmd1, shell=True)          
 
     price = open("price2.txt", 'r')
@@ -144,7 +146,8 @@ def phase2():
         ad1 = i.split(":")  
         plistt.append(ad1)    
     for k in range(len(plistt)):
-        kkey = plistt[k][0]
+        kkey1 = plistt[k][0]
+        kkey = kkey1.replace(' ', '')
         kval = plistt[k][1]
         k += 1
         
