@@ -4,21 +4,6 @@ import re
 querylist =  []   
 queryeraser =  []
 
-adsDB = db.DB()
-adsDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
-#ad = ads.cursor()
-
-termsDB = db.DB()
-termsDB.open('te.idx',None,db.DB_BTREE,db.DB_CREATE)
-#term = termsDB.cursor()
-
-pdatesDB = db.DB()
-pdatesDB.open('da.idx',None,db.DB_BTREE,db.DB_CREATE)
-#pdat = pdatesDB.cursor()
-
-priceDB = db.DB()
-priceDB.open('pr.idx',None,db.DB_BTREE,db.DB_CREATE)
-#price = priceDB.curosr()
 
 
 def main():    
@@ -78,42 +63,70 @@ def fetch():
     
     for a in querylist:
         if a.startswith(pr):
-            price(a)
+            price_location(a,0)
 
     for b in querylist:
         if b.startswith(da):
-            date(b) 
+            date_cat(b,0) 
             
     for c in querylist:
         if c.startswith(lo):
-            location(c)
+            price_location(0,c)
             
     for d in querylist:
         if d.startswith(ca):
-            cat(d)
+            date_cat(0,d)
 
     
-def price(pr):
-    if len(pr) != 0: 
+def price_location(pr,lo):
+    priceDB = db.DB()
+    priceDB.open('pr.idx',None,db.DB_BTREE,db.DB_CREATE)
+    #price = priceDB.curosr()    
+    
+    if pr != 0: 
         cursor = priceDB.cursor()
-        searchdatabase(pr,cursor, priceDB)
+        #searchdatabase(pr,cursor, priceDB)
         
-def date(da):
-    if len(da) != 0: 
+    if lo != 0: 
+        cursor = priceDB.cursor()
+        #searchdatabase(lo,cursor, priceDB)
+            
+def date_cat(da,ca):
+    pdatesDB = db.DB()
+    pdatesDB.open('da.idx',None,db.DB_BTREE,db.DB_CREATE)
+    #pdat = pdatesDB.cursor()    
+    
+    if da != 0: 
         cursor = pdatesDB.cursor()
-        searchdatabase(da,cursor,pdatesDB)
+        #searchdatabase(da,cursor, pdateDB)
         
+    if ca != 0: 
+        cursor = pdatesDB.cursor()
+        #searchdatabase(ca,cursor, pdatesDB)      
+
+'''        
 def location(lo):
     if len(lo) != 0: 
         cursor = pricesDB.cursor()
-        searchdatabase(lo,cursor,pdatesDB)
-        
+        #searchdatabase(lo,cursor)
+ 
+       
 def cat(ca):
     if len(ca) != 0: 
         cursor = pdatesDB.cursor()
-        searchdatabase(ca,cursor,pdatesDB)    
-        
+        #searchdatabase(ca,cursor)    
+'''    
+       
 def searchdatabase(name,cursor,database):
+    adsDB = db.DB()
+    adsDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
+    #ad = ads.cursor()
+    
+    termsDB = db.DB()
+    termsDB.open('te.idx',None,db.DB_BTREE,db.DB_CREATE)
+    #term = termsDB.cursor()
+    
+    
     search = cursor.first()
     while search:           
         result = cursor.set(name.encode("utf-8")) 
@@ -130,9 +143,10 @@ def searchdatabase(name,cursor,database):
                 dup = cursor.next_dup()
         else:
             print("No Entry Found.")   
+            break
         
-    #curs.close()
-   # priceDB.close()
+    cursor.close()
+    priceDB.close()
 
 if __name__ == "__main__":
         main()
