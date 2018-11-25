@@ -1,140 +1,132 @@
 from bsddb3 import db
+import re
 
-def phase3():
-    # commented out but will be ised for later query matching and selection
-    """
-    user = input("enter your query: ").lower().replace(" ", "")
-    #print(user)
-
-    #start_date_equal = re.match("date=", user) 
-    #if start_date_equal != None:
-    for x2 in re.finditer('date=', user):
-        #print(start_date_equal)
-        print(x2.start(), x2.end(), x2.group())  
-    #end_date_equal = user.find("date") or user.find("price") or user.find("location") or 21 
-    #end_date_equal = start_date_equal + 16
-    #date_equal = user[start_date_equal : end_date_equal]
-    
-    
-    start_date_greater = re.match("date>", user)
-    if start_date_greater != None:
-        print(start_date_greater)
-    #end_date_greater = start_date_greater + 16
-    #date_greater = user[start_date_greater : end_date_greater]
-    
-    
-    #if user.find("date>=") and len == 6
-    #start_date_greater_or_equal = re.match("date>=", user)
-    for x1 in re.finditer('date>=', user):
-    #if start_date_greater_or_equal != None:
-        print(start_date_greater_or_equal)
-    #end_date_greater_or_equal = start_date_greater_or_equal + 16
-    #date_greater_or_equal = user[start_date_greater_or_equal : end_date_greater_or_equal]
-    
-    start_date_less = re.match("date<", user)
-    if start_date_less != None:
-        print(start_date_less)
-    # = start_date_less + 16
-    #date_less = user[start_date_less : end_date_less] 
-    
-
-    start_date_less_or_equal = re.match("date<=", user)
-    if start_date_less_or_equal != None:
-        print(start_date_less_or_equal)
-    #end_date_less_or_equal = start_date_less_or_equal + 16
-    #date_less_or_equal = user[start_date_less_or_equal : end_date_less_or_equal] 
-    
-    
-    #start_price_equal = re.match("price=", user)
-    #if start_price_equal != None:
-        #print(start_price_equal)
-        
-    for x in re.finditer('price=', user):
-        print(x.start(), x.end(), x.group())        
-    #end_price_equal = start_price_equal + 8
-    #price_equal = user[start_price_equal : end_price_equal]
-    
-    
-    
-    for x1 in re.finditer('price>', user):
-        print(x1.start(), x1.end(), x1.group())   
-        #start_price_greater = re.match("price>", user)
-    #if start_price_greater != None:
-     #   print(start_price_greater)
-    #end_price_greater = start_price_greater + 8
-    #price_greater = user[start_price_greater : end_price_greater]
-    
-    
-    for x2 in re.finditer('price>=', user):
-        print(x2.start(), x2.end(), x2.group())       
-    #start_price_greater_or_equal = re.match("price>=", user)
-    #if start_price_greater_or_equal != None:
-     #   print(start_price_greater_or_equal)
-    #end_price_greater_or_equal = start_price_greater_or_equal + 9
-    #price_greater_or_equal = user[start_price_greater_or_equal : end_price_greater_or_equal]  
-    
-    
-    start_price_less = re.match("price<", user)
-    if start_price_less != None:
-        print(start_price_less)
-    #end_price_less = start_price_less + 8
-    #price_less = user[start_price_less : end_price_less]
-    
-
-    start_price_less_or_equal = re.match("price<=", user)
-    if start_price_less_or_equal != None:
-        print(start_price_less_or_equal)
-    #end_price_less_or_equal = start_price_less_or_equal + 9
-    #price_less_or_equal = user[start_price_less_or_equal : end_price_less_or_equal]
-    
-
-    #The user should be able to change the output format to full record by typing "output=full" and back to id and title only using "output=brief"
-    
-    #first query returns all records that have camera as a word in the title or description fields. 
-    
-    #The second query returns all records that have a term starting with camera% in the title or description fields
-    
-    #put the user input in a list and but list could get really long 
-"""
-    #connection to the different databases
-    adsDB = db.DB()
-    termsDB = db.DB()
-    pdatesDB = db.DB()
-    priceDB = db.DB()
-    adsDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
-    termsDB.open('te.idx',None,db.DB_BTREE,db.DB_CREATE)
-    pdatesDB.open('da.idx',None,db.DB_BTREE,db.DB_CREATE)
-    priceDB.open('pr.idx',None,db.DB_BTREE,db.DB_CREATE)
-        
-    #cursors need to  be defined for each database when we connect and pass a query after matching
-    curs = priceDB.cursor()
-    
-    while(True):
-        name = input("Enter a Name to look up: ")
-        if(name == "q"): #Termination Condition
-            break
-        
-        result = curs.set(name.encode("utf-8")) 
-        #In the presence of duplicate key values, result will be set on the first data item for the given key. 
-       
-        if(result != None):
-            print("List of descriptionns that match:")
-            print("Key: " + str(result[0].decode("utf-8")) + ", Value: " + str(result[1].decode("utf-8")))
-            
-            #iterating through duplicates:
-            dup = curs.next_dup()
-            while(dup != None):
-                print("key: " + str(dup[0].decode("utf-8")) + ", Value: " + str(dup[1].decode("utf-8")))
-                dup = curs.next_dup()
-        else:
-            print("No Entry Found.")
-                
-    
-    curs.close()
-    priceDB.close()
+querylist =  []   
+queryeraser =  []
 
 def main():
-    phase3()
+    print("Please enter your query, type exit to quit.")
+    while True:
+        text = input()
+        text = text.strip(" ")
+        text = " "+text 
+        if text == "exit":
+            break
+        else:
+            parseQuery(text)
+            break
+        
+def parseQuery(text):
+    global querylist
+    dateRe = '(\ {1,}date\{0,}[<>]{0,1}[=]{0,1}\d{2})[/](\d{2})[/](\d{4}\ {0,}[a-zA-Z0-9-_]{0,})'
+    priceRe = '(\ {1,}price\ {0,}[<>]{0,1}[=]{0,1}\ {0,}[a-zA-Z0-9-_]{0,})'
+    locationRe = '(\ {1,}location\ {0,}[=]{0,1}\ {0,}[a-zA-Z0-9-_]{0,})'
+    catRe = '(\ {1,}cat\ {0,}[=]{0,1}\ {0,}[a-zA-Z0-9-_]{0,})'
+    captureQuery(dateRe, text)
+    captureQuery(locationRe, text)
+    captureQuery(priceRe, text)
+    captureQuery(catRe, text)
+    captureRest(text)
+    print("QueryList")
+    print(querylist)
 
-if __name__ == "__main__":
-    main()
+def captureQuery(Re, text):
+    global queryeraser, querylist
+    captures = re.findall(Re, text)
+    for i in captures:
+        queryeraser.append(i)
+        i = i.replace(" ","")
+        querylist.append(i)
+
+
+def captureRest(text):
+    global queryeraser, querylist
+    strre = '(^\w{0,1}[^<>=]$)'
+    for i in queryeraser:
+        text = text.replace(i,"")
+    text = text.split(" ")
+
+    for i in text:
+        querylist.append(i)
+   
+            
+adsDB = db.DB()
+termsDB = db.DB()
+pdatesDB = db.DB()
+priceDB = db.DB()
+adsDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
+termsDB.open('te.idx',None,db.DB_BTREE,db.DB_CREATE)
+pdatesDB.open('da.idx',None,db.DB_BTREE,db.DB_CREATE)
+priceDB.open('pr.idx',None,db.DB_BTREE,db.DB_CREATE)
+
+def fetch():
+    global  querylist
+    pr = 'price'
+    da = 'date'
+    lo = 'location'
+    ca = 'cat'
+    
+    for a in querylist:
+        if a.startswith(pr):
+            price(a)
+
+    for b in querylist:
+        if b.startswith(da):
+            date(b) 
+            
+    for c in querylist:
+        if c.startswith(lo):
+            location(c)
+            
+    for d in querylist:
+        if d.startswith(ca):
+            cat(d)
+
+    
+def price(pr):
+    if len(pr) != 0: 
+        curs = priceDB.cursor()
+        print('pr')
+        print(pr)
+    
+def date(da):
+    if len(da) != 0: 
+        curs = pdatesDB.cursor()
+        print('da')
+        print(da)
+        
+def location(lo):
+    if len(lo) != 0: 
+        curs = pricesDB.cursor()
+        print('lo')
+        print(lo)
+        
+def cat(ca):
+    if len(ca) != 0: 
+        curs = pdatesDB.cursor()
+        print('ca')
+        print(ca)     
+        
+while(True):
+    name = input("Enter a Name to look up: ")
+    if(name == "q"): #Termination Condition
+        break
+    
+    result = curs.set(name.encode("utf-8")) 
+    #In the presence of duplicate key values, result will be set on the first data item for the given key. 
+   
+    if(result != None):
+        print("List of descriptionns that match:")
+        print("Key: " + str(result[0].decode("utf-8")) + ", Value: " + str(result[1].decode("utf-8")))
+        
+        #iterating through duplicates:
+        dup = curs.next_dup()
+        while(dup != None):
+            print("key: " + str(dup[0].decode("utf-8")) + ", Value: " + str(dup[1].decode("utf-8")))
+            dup = curs.next_dup()
+    else:
+        print("No Entry Found.")
+            
+
+curs.close()
+priceDB.close()
