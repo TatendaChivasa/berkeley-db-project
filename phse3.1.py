@@ -306,7 +306,7 @@ def rangesearch(n, n1, cursor, database):
                 ans = (str(result[0].decode("utf-8")) + ": " + str(result[1].decode("utf-8")))
                 resultlist.add(ans)
                 result = cursor.next() 
-                print(resultlist)
+                #print(resultlist)
         else:
             print("No ranges were found")
                 
