@@ -342,7 +342,13 @@ def searchdatabase(name,cursor,database):
             
 def getquery():
     global resultlist
+    adDB = db.DB()
+    adDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
+    cursor = adDB.cursor()   
+    
+    final = []
     firstlist = []
+    aids = []
     for i in resultlist:
         n = i.split(':')
         firstlist.append(n)
@@ -350,13 +356,22 @@ def getquery():
         print('No records found')
         
     for i in range (len(firstlist)):
-        for j in range (len(firstlist[i])):
-            Ads = firstlist[i][j]
-            splitAds = Ads.split(',')
-            aids = splitAds[0]               
-        print(aids, end=' ')
-        print()                 
-            
+        Ads = firstlist[i][1]
+        Ads = Ads[:-1]
+        if Ads:    
+            print(Ads)
+            aids.append(Ads)
+    print('aids',aids, end=' ')
+    print()
+    for y in aids:
+        full = adDB.get(y.encode('utf-8'))
+        #print('full:',full)
+        print()
+        if full != None:
+            final.append(str(full))
+        print('Full list = ',final)    
+    print()            
+    
   
 def getidealcond(text):
     global queryeraser, querylist
