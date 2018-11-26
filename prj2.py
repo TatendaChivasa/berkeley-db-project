@@ -28,8 +28,6 @@ def phase1():
                 category = ad[8][:-5]
                 city = ad[6][:-5]
                 
-                prizes = ad[14][:-7]
-                prizes = prizes.split(" ")
                 
                 title = ad[10][:-4]
                 title = title.split(" ")
@@ -93,16 +91,14 @@ def phase1():
                         j = p + ":"
                         info4 = j + rest            
                         pdates.write(str(info4) + "\n")
-                        
-        
-                for n in prizes:
-                    n = n.lower()
-                    rest = aid + ',' + category + ',' + city
-                    q = n + ":"
-                    info3 = q + rest            
-                    prices.write( (str(info3).rjust(50, ' '))+ "\n")
-                    #prices.write(str(info3) + "\n")
-                   
+                  
+                prizes = ad[14][:-7]
+                tab = 20 - len(prizes)
+                n =(tab*' ') + prizes.lower()
+                rest = aid + ',' + category + ',' + city
+                q = n + ":"
+                info3 = q + rest                     
+                prices.write( (str(info3))+ "\n") 
                 
     terms.close()
     prices.close()
@@ -148,8 +144,7 @@ def phase2():
         ad1 = i.split(":")  
         plistt.append(ad1)    
     for k in range(len(plistt)):
-        kkey1 = plistt[k][0]
-        kkey = kkey1.replace(' ', '')
+        kkey = plistt[k][0]
         kval = plistt[k][1]
         k += 1
         
@@ -211,5 +206,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
-      
