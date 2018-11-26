@@ -346,8 +346,9 @@ def getquery():
     for i in resultlist:
         n = i.split(':')
         firstlist.append(n)
-        if firstlist == []:
-            print('No records found')
+    if firstlist == []:
+        print('No records found')
+        
     for i in range (len(firstlist)):
         for j in range (len(firstlist[i])):
             Ads = firstlist[i][j]
