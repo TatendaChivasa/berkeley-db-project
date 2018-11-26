@@ -6,34 +6,6 @@ from datetime import timedelta
 querylist =  []   
 queryeraser =  []
 
-
-
-#def main():    
-    #print("Please enter your query, type exit to quit.") #secify output form 
-    #while True:
-        #text = input()
-        #text = text.strip(" ")
-        #text = " "+text 
-        #if text == "exit":
-            #break
-        #else:
-            #parseQuery(text)
-            #break
-        
-#def parseQuery(text):
-    #global querylist
-    #dateRe = '(\ {1,}date\{0,}[<>]{0,1}[=]{0,1}\d{2})[/](\d{2})[/](\d{4}\ {0,}[a-zA-Z0-9-_]{0,})'
-    #priceRe = '(\ {1,}price\ {0,}[<>]{0,1}[=]{0,1}\ {0,}[a-zA-Z0-9-_]{0,})'
-    #locationRe = '(\ {1,}location\ {0,}[=]{0,1}\ {0,}[a-zA-Z0-9-_]{0,})'
-    #catRe = '(\ {1,}cat\ {0,}[=]{0,1}\ {0,}[a-zA-Z0-9-_]{0,})'
-    #captureQuery(dateRe, text)
-    #captureQuery(locationRe, text)
-    #captureQuery(priceRe, text)
-    #captureQuery(catRe, text)
-    #captureRest(text)
-    #print("QueryList")
-#print(querylist)
-    ##fetch()
 def parseQuery(text):
     global querylist
     dateRe = '(\ {1,}date\{0,}[<>]{0,1}[=]{0,1}\d{2})[/](\d{2})[/](\d{4}\ {0,}[a-zA-Z0-9-_]{0,})'
@@ -148,12 +120,11 @@ def terms(te):
     if te != 0:
         if(term1.match(te)):
             firstterm = re.sub("%",'',te)
-            print('firstterm', firstterm)
+            #print('firstterm', firstterm)
         else:
             secondterm = re.sub("%", '', te)
-            print('secondterm', secondterm)
-             
-        
+            #print('secondterm', secondterm)
+                     
         cursor = termsDB.cursor
     
 def price_location(pr,lo):
@@ -167,18 +138,21 @@ def price_location(pr,lo):
         
         if (price1.match(pr)):
             greatpr=re.sub("price\>",'',pr)
-            print("greatpr:",greatpr)
+          #  print("greatpr:",greatpr)
         elif (price2.match(pr)):
             lesspr=re.sub("price\<",'',pr)
-            print("lesspr:",lesspr)
+           # print("lesspr:",lesspr)
         cursor = priceDB.cursor()
+        
+        
+        rangesearch(greatpr, lesspr, cursor, priceDB)
         #searchdatabase(pr,cursor, priceDB)
         
     if lo != 0: 
         loc = re.sub('location\=','', lo)
-        print("location",loc)
+        #print("location",loc)
         cursor = priceDB.cursor()
-        #searchdatabase(lo,cursor, priceDB)
+        searchdatabase(lo,cursor, priceDB)
             
 def date_cat(da,ca):
     date1 = re.compile("date\>\\d{4}\/\d{2}\/\d{2}")
@@ -187,55 +161,92 @@ def date_cat(da,ca):
        
     pdatesDB = db.DB()
     pdatesDB.open('da.idx',None,db.DB_BTREE,db.DB_CREATE)
-    #pdat = pdatesDB.cursor()    
     
     if da != 0: 
         
         
         if (date1.match(da)):
             greatda=re.sub('date\>','',da)
-            print("great date",greatda)
+           # print("great date",greatda)
         if (date2.match(da)):
             lessda=re.sub('date\<','',da)
-            print("less date",lessda)
+         #   print("less date",lessda)
         cursor = pdatesDB.cursor()
-        #searchdatabase(da,cursor, pdateDB)
+        rangesearch(greatda, lessda, cursor, pdateDB)
         
     if ca != 0: 
         if(category.match(ca)):
             cat = re.sub('cat\=','',ca)
-            print('category',cat)
+           # print('category',cat)
         cursor = pdatesDB.cursor()
-        #searchdatabase(ca,cursor, pdatesDB)      
+        searchdatabase(ca,cursor, pdatesDB)      
 
-'''        
-def location(lo):
-    if len(lo) != 0: 
-        cursor = pricesDB.cursor()
-        #searchdatabase(lo,cursor)
+       
+def rangesearch(startingvalue, endvalue, cursor, database):
+    #priceDB = db.DB()
+    #priceDB.open('pr.idx',None,db.DB_BTREE,db.DB_CREATE)  
+    
+    #cursor = priceDB.cursor() 
+    if database == priceDB:
+        tab = 20 - len(startingvalue)
+        n =(tab*' ') + startingvalue
+        
+        tab1 = 20 - len(endvalue)
+        n1 =(tab1*' ') + endvalue       
+        
+    else:
+        n = startingvalue 
+        n1= endvalue 
+            
+            
+    if n ==  None:
+        n = cursor.first()
+    if n1 == None:
+        n1 = cursor.last()   
+            
+         
+    
+    while(True):
+        #startingvalue = input("Enter the Starting_value: ")
+        #endvalue = input("Enter the Ending_value: ")
+
+        #if(endvalue == "q"): #Termination Condition
+                #break         
+        
+        #get the record that has the smallest key greater than or equal to the Starting Name:
+        result = cursor.set_range(n.encode("utf-8")) 
+       
+        if(result != None):
+            print("List of found descriptions:")
+        
+            while(result != None):
+                #Checking the end condition: If the student's name comes after(or equal to) Ending_Name
+                if(str(result[0].decode("utf-8")[0:len(n1)])>=n1): 
+                    break
+                
+                print(str(result[0].decode("utf-8")) + ": " + str(result[1].decode("utf-8")))
+                result = cursor.next() 
+        else:
+            print("No ranges were found")
+                
+        NewSearch = input("Do you want to start a new search?(press y for yes) ")
+        if(NewSearch != "y"): #Termination Condition
+            break
  
-       
-def cat(ca):
-    if len(ca) != 0: 
-        cursor = pdatesDB.cursor()
-        #searchdatabase(ca,cursor)    
-'''    
-       
 def searchdatabase(name,cursor,database):
-    adsDB = db.DB()
-    adsDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
-    #ad = ads.cursor()
+#def searchdatabase():  
+    #print(name)
     
-    
-    
-    
-    search = cursor.first()
-    while search:           
+    while (True): 
+       # name = input("Enter a student Name to look up: ")
+        #if(name == "q"): #Termination Condition
+          #  break  
+        
         result = cursor.set(name.encode("utf-8")) 
         #In the presence of duplicate key values, result will be set on the first data item for the given key. 
         
         if(result != None):
-            print("List of descriptionns that match:")
+            print("List of descriptions that match:")
             print("Key: " + str(result[0].decode("utf-8")) + ", Value: " + str(result[1].decode("utf-8")))
             
             #iterating through duplicates:
@@ -244,11 +255,7 @@ def searchdatabase(name,cursor,database):
                 print("key: " + str(dup[0].decode("utf-8")) + ", Value: " + str(dup[1].decode("utf-8")))
                 dup = cursor.next_dup()
         else:
-            print("No Entry Found.")   
-            break
-        
-    cursor.close()
-    priceDB.close()
+            print("No Entry Found.") 
     
     
 def getidealcond(text):
@@ -416,3 +423,31 @@ def main():
 
 if __name__ == "__main__":
         main()
+        
+        
+        #def main():    
+            #print("Please enter your query, type exit to quit.") #secify output form 
+            #while True:
+                #text = input()
+                #text = text.strip(" ")
+                #text = " "+text 
+                #if text == "exit":
+                    #break
+                #else:
+                    #parseQuery(text)
+                    #break
+                
+        #def parseQuery(text):
+            #global querylist
+            #dateRe = '(\ {1,}date\{0,}[<>]{0,1}[=]{0,1}\d{2})[/](\d{2})[/](\d{4}\ {0,}[a-zA-Z0-9-_]{0,})'
+            #priceRe = '(\ {1,}price\ {0,}[<>]{0,1}[=]{0,1}\ {0,}[a-zA-Z0-9-_]{0,})'
+            #locationRe = '(\ {1,}location\ {0,}[=]{0,1}\ {0,}[a-zA-Z0-9-_]{0,})'
+            #catRe = '(\ {1,}cat\ {0,}[=]{0,1}\ {0,}[a-zA-Z0-9-_]{0,})'
+            #captureQuery(dateRe, text)
+            #captureQuery(locationRe, text)
+            #captureQuery(priceRe, text)
+            #captureQuery(catRe, text)
+            #captureRest(text)
+            #print("QueryList")
+        #print(querylist)
+            #fetch()
