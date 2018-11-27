@@ -7,6 +7,10 @@ from datetime import timedelta
 querylist =  []   
 queryeraser =  []
 resultlist = set()
+def getresult(result):
+    r=result.split(",")
+    return r[0]
+
 
 def parseQuery(text):
     global querylist
@@ -267,7 +271,33 @@ def getloc(loc,cursor, database):
                 result = cursor.next() 
     else:
         print("No locations were found")    
-"""    
+""" 
+def getpriceequals(name):
+    name=str(name.replace(" ",""))
+    DB_File = "pr.idx"
+    database = db.DB()
+    database.set_flags(db.DB_DUP) #declare duplicates allowed before you create the database
+    database.open(DB_File,None, db.DB_BTREE, db.DB_CREATE)
+    curs = database.cursor()
+    
+    result = curs.set(name.encode("utf-8")) 
+    mylist = []
+    #In the presence of duplicate key values,Â result will be set on the first data item for the given key. 
+   
+    if(result != None):
+        print("prices and ids")
+        print("price: " + str(result[0].decode("utf-8")) + ", id: " + str(getresult(result[1].decode("utf-8"))))
+        
+        #iterating through duplicates:
+        dup = curs.next_dup()
+        while(dup != None):
+            print("price: " + str(dup[0].decode("utf-8")) + ", id: " + str(getresult(dup[1].decode("utf-8"))))
+            mylist.append(getresult(str(getresult(dup[1].decode("utf-8")))))
+            dup = curs.next_dup()
+    else:
+        print("No Entry Found.")
+    getpricequery(mylist)        
+
 def rangesearch(n, n1, cursor, database): 
     global resultlist
     if n ==  None:
