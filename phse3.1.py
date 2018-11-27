@@ -330,6 +330,7 @@ def getquery():
     adDB = db.DB()
     adDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
     cursor = adDB.cursor()   
+     
     
     final = []
     firstlist = []
@@ -351,9 +352,14 @@ def getquery():
     for y in aids:
         if output == "full":
             full = adDB.get(y.encode('utf-8'))
+   
+        if output == "brief":
+                #termsDB = db.DB()
+                #termsDB.open('te.idx',None,db.DB_HASH,db.DB_CREATE)
+                #cursor = termsDB.cursor()                  
+            full = terms(y)
         print(full)
-        #else:
-            
+             
         #if full != None:
             #final.append(str(full))          
     
