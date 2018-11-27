@@ -343,9 +343,8 @@ def getquery():
     
     print()
     for y in aids:
+        ylist.append(y)
         if output == "full":
-            ylist.append(y)
-
             full = adDB.get(y.encode('utf-8'))
             
             #full=str(full.decode('utf-8'))
