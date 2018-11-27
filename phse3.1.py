@@ -8,6 +8,10 @@ querylist =  []
 queryeraser =  []
 resultlist = set()
 
+def getresult(result):
+    r=result.split(",")
+    return r[0]
+
 def parseQuery(text):
     global querylist
     dateRe = '(\ {1,}date\{0,}[<>]{0,1}[=]{0,1}\d{2})[/](\d{2})[/](\d{4}\ {0,}[a-zA-Z0-9-_]{0,})'
@@ -161,8 +165,8 @@ def terms(te):
     #main()   
                 
     
-    #cursor.close()
-    #termsDB.close()    
+    cursor.close()
+    termsDB.close()    
     
 def pricefunct(pr):
     priceDB = db.DB()
@@ -199,24 +203,48 @@ def pricefunct(pr):
             tab = 20 - len(money1)
             m =(tab*' ') + money1
             money = m            
-            searchdatabase(money,cursor, priceDB)
+            getpriceequals(money)
         else:  
             rangesearch(greatpr, lesspr, cursor, priceDB)#commented out the range function       
-            
+
+def getpricequery(n):
+    global resultlist
+    adDB = db.DB()
+    adDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
+    cursor = adDB.cursor()   
+
+    final = []
+
+    for y in n:
+        full = adDB.get(y.encode('utf-8'))
+        #print('full:',full)
+        print()
+        if full != None:
+            final.append(str(full))
+        print('Full list = ',final)    
+    print()            
+
+    cursor.close()
+    adDB.close()
+    
 def date_cat_loc(da,ca,lo):
     date1 = re.compile("date\>\\d{4}\/\d{2}\/\d{2}")
     date2 = re.compile("date\<\\d{4}\/\d{2}\/\d{2}")
     category= re.compile("cat\=[A-Za-z_-]")
-    location = re.compile("location\=[A-Za-z0-9]")  
+    location1 = re.compile("location\=[A-Za-z0-9]")  
     pdatesDB = db.DB()
     pdatesDB.open('da.idx',None,db.DB_BTREE,db.DB_CREATE)
     cursor = pdatesDB.cursor()
     
     if lo != 0: 
         loc = re.sub('location\=','', lo)
-        #getloc(loc,cursor, pdatesDB)        
+        print(loc)
+        #locquery = re.match('[A-Za-z]',loc)
+        #print('loc: ',loc)
+        location(loc)
     else:
-        loc = None     
+        loc = None 
+        location(loc)
     
     if da != 0:  
         if (date1.match(da)):
@@ -239,6 +267,62 @@ def date_cat_loc(da,ca,lo):
     #cursor = pdatesDB.cursor()
     #searchdatabase(ca,cursor, pdatesDB)  
     
+def getloc(loc,cursor, database):
+        #break
+    #loc1 = firstterm[:-1]
+    ind = len(loc)
+    #print(loc)
+    result = cursor.set_range(loc.encode("utf-8"))
+    #print(result)
+    if(result != None):
+        print("List of locations:")
+    
+        while(result != None):
+            print(result[1])
+            check = result[1].decode("utf-8")
+            print(check)
+            check = check[:-3]
+            print(check)
+"""            
+            #Checking the end condition: If the student's name comes after(or equal to) Ending_Name
+            if(str(check[:(-(ind))])==loc): 
+                print(str(result[0].decode("utf-8")) + ": " + str(result[1].decode("utf-8")))
+                result = cursor.next()
+            #if(str(result[0].decode("utf-8")[:end])!=n): 
+                #break
+            else:
+                #print(str(result[0].decode("utf-8")) + ": " + str(result[1].decode("utf-8")))
+                result = cursor.next() 
+    else:
+        print("No locations were found")    
+"""    
+def getpriceequals(name):
+    name=str(name.replace(" ",""))
+    DB_File = "pr.idx"
+    database = db.DB()
+    database.set_flags(db.DB_DUP) #declare duplicates allowed before you create the database
+    database.open(DB_File,None, db.DB_BTREE, db.DB_CREATE)
+    curs = database.cursor()
+    
+    result = curs.set(name.encode("utf-8")) 
+    mylist = []
+    #In the presence of duplicate key values, result will be set on the first data item for the given key. 
+   
+    if(result != None):
+        print("prices and ids")
+        print("price: " + str(result[0].decode("utf-8")) + ", id: " + str(getresult(result[1].decode("utf-8"))))
+        
+        #iterating through duplicates:
+        dup = curs.next_dup()
+        while(dup != None):
+            print("price: " + str(dup[0].decode("utf-8")) + ", id: " + str(getresult(dup[1].decode("utf-8"))))
+            mylist.append(getresult(str(getresult(dup[1].decode("utf-8")))))
+            dup = curs.next_dup()
+    else:
+        print("No Entry Found.")
+    getpricequery(mylist)        
+
+
 def rangesearch(n, n1, cursor, database): 
     global resultlist
     if n ==  None:
@@ -248,28 +332,27 @@ def rangesearch(n, n1, cursor, database):
         n1 = cursor.last()
         n1 = (n1[0].decode("utf-8")) 
     
-    #while(True):
-    result = cursor.set_range(n.encode("utf-8")) 
-    
-    if(result != None):
-        #print("List of found descriptions:")
-    
-        while(result != None):
-            #Checking the end condition: If the student's name comes after(or equal to) Ending_Name
-            if(str(result[0].decode("utf-8")[0:len(n1)])>=n1): 
-                break
-            
-            ans = (str(result[0].decode("utf-8")) + ": " + str(result[1].decode("utf-8")))
-            #print(ans)
-            resultlist.add(ans)
-            result = cursor.next() 
-            #print(resultlist)
-    else:
-        print("No ranges were found")
-        #main()    
-        NewSearch = input("Do you want to start a new search?(y/n) ")
-        if(NewSearch != "y"): #Termination Condition
-            main()
+    while(True):
+        result = cursor.set_range(n.encode("utf-8")) 
+        
+        if(result != None):
+            #print("List of found descriptions:")
+        
+            while(result != None):
+                #Checking the end condition: If the student's name comes after(or equal to) Ending_Name
+                if(str(result[0].decode("utf-8")[0:len(n1)])>=n1): 
+                    break
+                
+                ans = (str(result[0].decode("utf-8")) + ": " + str(result[1].decode("utf-8")))
+                resultlist.add(ans)
+                result = cursor.next() 
+                #print(resultlist)
+        else:
+            print("No ranges were found")
+            main()    
+        #NewSearch = input("Do you want to start a new search?(y/n) ")
+        #if(NewSearch != "y"): #Termination Condition
+            #break
         #else:
             
 
@@ -287,20 +370,19 @@ def searchdatabase(name,cursor,database):
         dup = cursor.next_dup()
         while(dup != None):
             ans33 = (str(dup[0].decode("utf-8")) + " : " + str(dup[1].decode("utf-8")))
-            #print(ans33)            
             resultlist.add(ans33)
             dup = cursor.next_dup()
-    #else:
+    else:
         #print("No Entry Found.")
         #NewSearch2 = input("Do you want to start a new search?(press y/n) ")
         #if(NewSearch2 != "y"): #Termination Condition
           #  sys.exit()
         #else:
-        #main() 
+        main() 
+            
             
 def getquery():
     global resultlist
-    #print('res: ', resultlist)
     templist = list(resultlist)
     adDB = db.DB()
     adDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
@@ -327,27 +409,16 @@ def getquery():
         if Ads:    
             aids.append(Ads)
             
-    print('aids',aids, end=' ')
     print()
     for y in aids:
-        y = y.replace(' ','')        
-        print(y)
-        full = adDB.get(y.encode('utf-8'))
-        print('full:',full)
-    
-        if full != None:
-            final.append(str(full))
-            print('Full list = ',final)    
-    print()       
-'''             
-    for y in aids:
         if output == "full":
-            y = y.replace('  ','')
-            print('y:',y)
             full = adDB.get(y.encode('utf-8'))
-            print(full)
-        
             
+            if full != None:
+                final.append(str(full))
+                print('Full list = ',final)    
+                print()       
+
         elif output == "brief":
             term = cursor.set(y.encode("utf-8"))
             if(term != None):
@@ -358,13 +429,8 @@ def getquery():
             
         else:
             print('Enter a valid option')
-            
-        if full != None:
-            final.append(str(full))
-            print('Full list = ',final)             
-        else: 
-            print('not gucci')
-'''
+
+  
 def getidealcond(text):
     global queryeraser, querylist
     finallist = set()
@@ -516,6 +582,39 @@ def getidealcond(text):
     finallist = list(finallist) 
 
     return finallist
+
+def location(name):
+    global resultlist
+    name = name.lower()    
+    adsDB = db.DB()
+    adsDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
+    adCursor = adsDB.cursor()
+    top = adCursor.first() 
+    while (top != None):
+        ad = str(top[1].decode("utf-8"))
+        locSearch = re.search('<loc>(.*)</loc>',ad)
+        loc = locSearch.group(1)
+        if (loc.lower() ==name ):
+            resultlist.add(ad)
+        top = adCursor.next()
+        
+
+#/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+def date(name):
+    global resultlist 
+    name = name.lower()
+    top = adCursor.first()     
+    adsDB = db.DB()
+    adsDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
+    adCursor = adsDB.cursor()
+    while (top != None):
+        ad = str(top[1].decode("utf-8"))
+        locSearch = re.search('<date>(.*)</date>',ad)
+        loc = locSearch.group(1)
+        if (loc.lower() == name):
+            resultlist.add(ad)
+        top = adCursor.next()
+     
 
 def main():
     print("Please enter your query, type exit to quit.")
