@@ -114,22 +114,7 @@ def fetch(text):
             terms(te)
             
 def terms(te):
-    global resultlist
-    #term1 = re.compile("[A-Za-z0-9]+[/%]")
-    #termsDB = db.DB()
-    #termsDB.open('te.idx',None,db.DB_BTREE,db.DB_CREATE)
-    ##term = termsDB.cursor()
-    
-    #if te != 0:
-        #if(term1.match(te)):
-            #firstterm = re.sub("%",'',te)
-            ##print('firstterm', firstterm)
-        #else:
-            #secondterm = re.sub("%", '', te)
-            ##print('secondterm', secondterm)
-                     
-        #cursor = termsDB.cursor
-    
+    global resultlist 
     termsDB = db.DB()
     termsDB.open('te.idx',None,db.DB_BTREE,db.DB_CREATE)
         
@@ -171,9 +156,9 @@ def terms(te):
             searchdatabase(secondterm,cursor,termsDB) #should call the iterating function
     
             
-    NewSearch = input("Do you want to start a new search?(y/n) ")
-    if(NewSearch == "y"): #Termination Condition
-        main()   
+    #NewSearch = input("Do you want to start a new search?(y/n) ")
+    #if(NewSearch == "y"): #Termination Condition
+    #main()   
                 
     
     cursor.close()
@@ -258,7 +243,7 @@ def getloc(loc,cursor, database):
         #break
     #loc1 = firstterm[:-1]
     ind = len(loc)
-    print(loc)
+    #print(loc)
     result = cursor.set_range(loc.encode("utf-8"))
     #print(result)
     if(result != None):
@@ -309,12 +294,12 @@ def rangesearch(n, n1, cursor, database):
                 #print(resultlist)
         else:
             print("No ranges were found")
-                
-        NewSearch = input("Do you want to start a new search?(y/n) ")
-        if(NewSearch != "y"): #Termination Condition
-            break
-        else:
-            main()
+            main()    
+        #NewSearch = input("Do you want to start a new search?(y/n) ")
+        #if(NewSearch != "y"): #Termination Condition
+            #break
+        #else:
+            
 
 def searchdatabase(name,cursor,database):
     global resultlist
@@ -334,11 +319,11 @@ def searchdatabase(name,cursor,database):
             dup = cursor.next_dup()
     else:
         #print("No Entry Found.")
-        NewSearch2 = input("Do you want to start a new search?(press y/n) ")
-        if(NewSearch2 != "y"): #Termination Condition
-            sys.exit()
-        else:
-            main() 
+        #NewSearch2 = input("Do you want to start a new search?(press y/n) ")
+        #if(NewSearch2 != "y"): #Termination Condition
+          #  sys.exit()
+        #else:
+        main() 
             
 def getquery():
     global resultlist
@@ -349,6 +334,9 @@ def getquery():
     final = []
     firstlist = []
     aids = []
+    output = input("Please specify your output(full/brief):" )
+    #"output=full" "output=brief".
+        
     for i in resultlist:
         n = i.split(':')
         firstlist.append(n)
@@ -359,18 +347,15 @@ def getquery():
         Ads = firstlist[i][1]
         Ads = Ads[:-1]
         if Ads:    
-            print(Ads)
             aids.append(Ads)
-    print('aids',aids, end=' ')
-    print()
     for y in aids:
-        full = adDB.get(y.encode('utf-8'))
-        #print('full:',full)
-        print()
-        if full != None:
-            final.append(str(full))
-        print('Full list = ',final)    
-    print()            
+        if output == "full":
+            full = adDB.get(y.encode('utf-8'))
+        print(full)
+        #else:
+            
+        #if full != None:
+            #final.append(str(full))          
     
   
 def getidealcond(text):
@@ -441,6 +426,7 @@ def getidealcond(text):
                     line = re.sub('=', '', i[1])
 
                     line = datesub(line)
+        
 
                     list3.add(line)
                 else:
@@ -456,6 +442,7 @@ def getidealcond(text):
                     line = re.sub('=', '', i[1])
 
                     line = dateadd(line)
+                    #print("end",dateadd)
 
                     list4.add(line)
                 else:
