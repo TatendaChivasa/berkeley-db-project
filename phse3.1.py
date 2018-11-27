@@ -206,7 +206,25 @@ def pricefunct(pr):
             searchdatabase(money,cursor, priceDB)
         else:  
             rangesearch(greatpr, lesspr, cursor, priceDB)#commented out the range function       
-            
+ def getpricequery(n):
+    global resultlist
+    adDB = db.DB()
+    adDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
+    cursor = adDB.cursor()   
+    
+    final = []
+    
+    for y in n:
+        full = adDB.get(y.encode('utf-8'))
+        #print('full:',full)
+        print()
+        if full != None:
+            final.append(str(full))
+        print('Full list = ',final)    
+    print()            
+                  
+    cursor.close()
+    adDB.close()           
 def date_cat_loc(da,ca,lo):
     date1 = re.compile("date\>\\d{4}\/\d{2}\/\d{2}")
     date2 = re.compile("date\<\\d{4}\/\d{2}\/\d{2}")
