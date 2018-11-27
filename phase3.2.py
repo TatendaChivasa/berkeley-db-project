@@ -88,11 +88,12 @@ def fetch(text):
     lo = 'location'
     ca = 'cat'
     
+    
     for a in qlist[:]:
         if a.startswith(pr):
             qlist.remove(a)
             pricefunct(a)
-
+            
     for b in qlist[:]:
         if b.startswith(da):
             qlist.remove(b)
@@ -120,7 +121,6 @@ def terms(te):
         
     cursor = termsDB.cursor()
     
-        
     term1 = re.compile("[A-Za-z0-9]+[/%]")
     
     if te != 0:
@@ -165,6 +165,7 @@ def terms(te):
     #termsDB.close()    
     
 def pricefunct(pr):
+    #print(pr)
     priceDB = db.DB()
     priceDB.open('pr.idx',None,db.DB_BTREE,db.DB_CREATE)   
     price1 = re.compile("price\>[0-9]")
@@ -208,16 +209,25 @@ def date_cat_loc(da,ca,lo):
     date2 = re.compile("date\<\\d{4}\/\d{2}\/\d{2}")
     category= re.compile("cat\=[A-Za-z_-]")
     location = re.compile("location\=[A-Za-z0-9]")  
-    pdatesDB = db.DB()
-    pdatesDB.open('da.idx',None,db.DB_BTREE,db.DB_CREATE)
-    cursor = pdatesDB.cursor()
+    adDB = db.DB()
+    adDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
+    cursor = adDB.cursor()
     
     if lo != 0: 
         loc = re.sub('location\=','', lo)
-        #getloc(loc,cursor, pdatesDB)        
-    else:
-        loc = None     
-    
+        record = cursor.first()
+    while (record != None):
+        ad = str(record[1].decode("utf-8"))
+        if ad == None:
+            break
+        findloc = re.search('<loc>(.*)</loc>',ad)
+        location  = findloc.group(1)
+        if (loc == location):
+            found = (str(record[0].decode("utf-8")) + ": " + str(record[1].decode("utf-8")))
+            resultlist.add(found)
+        record = cursor.next()
+#getquery()
+   
     if da != 0:  
         if (date1.match(da)):
             greatda=re.sub('date\>','',da)
@@ -240,6 +250,7 @@ def date_cat_loc(da,ca,lo):
     #searchdatabase(ca,cursor, pdatesDB)  
     
 def rangesearch(n, n1, cursor, database): 
+
     global resultlist
     if n ==  None:
         n = cursor.first()
@@ -260,7 +271,7 @@ def rangesearch(n, n1, cursor, database):
                 break
             
             ans = (str(result[0].decode("utf-8")) + ": " + str(result[1].decode("utf-8")))
-            #print(ans)
+            #print(ans)            
             resultlist.add(ans)
             result = cursor.next() 
             #print(resultlist)
@@ -300,6 +311,7 @@ def searchdatabase(name,cursor,database):
             
 def getquery():
     global resultlist
+    
     templist = list(resultlist)
     adDB = db.DB()
     adDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
@@ -308,16 +320,19 @@ def getquery():
     final = []
     firstlist = []
     aids = []
+    ylist = []
     output = input("Please specify your output(full/brief):" )
     #"output=full" "output=brief".
         
     for i in resultlist:
         n = i.split(':')
         firstlist.append(n)
-    
+    #print('fisrt:',firstlist)
+        
     if firstlist == []:
         print('No records found')
-        
+    
+    
     for i in range (len(firstlist)):
         Ads = firstlist[i][1]       
         splitAds = Ads.split(',')
@@ -325,17 +340,24 @@ def getquery():
         Ads = Ads[:-1]
         if Ads:    
             aids.append(Ads)
-            
+    
     print()
     for y in aids:
         if output == "full":
+            ylist.append(y)
+
             full = adDB.get(y.encode('utf-8'))
+            
+            #full=str(full.decode('utf-8'))
+            #print('full', full)
             
             if full != None:
                 final.append(str(full))
-                print('Full list = ',final)    
+                #print('Full list = ',final)    
                 print()       
-
+            else:
+                print('full none')
+        
         elif output == "brief":
             term = cursor.set(y.encode("utf-8"))
             if(term != None):
@@ -347,7 +369,8 @@ def getquery():
         else:
             print('Enter a valid option')
 
-
+    print('y',ylist)    
+    
 def getidealcond(text):
     global queryeraser, querylist
     finallist = set()
