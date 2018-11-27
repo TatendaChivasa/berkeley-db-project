@@ -563,6 +563,41 @@ def getidealcond(text):
     finallist = list(finallist) 
 
     return finallist
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+def location(name):
+     global resultlist
+     name = name.lower()
+     top = adCursor.first()     
+     adsDB = db.DB()
+     adsDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
+     adCursor = adsDB.cursor()
+     while (top != None):
+          ad = str(top[1].decode("utf-8"))
+          locSearch = re.search('<loc>(.*)</loc>',ad)
+          loc = locSearch.group(1)
+          if (loc.lower() ==name ):
+               resultlist.append(ad)
+          top = adCursor.next()
+     return loc_aids     
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+def date(name):
+     global resultlist 
+     name = name.lower()
+     top = adCursor.first()     
+     adsDB = db.DB()
+     adsDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
+     adCursor = adsDB.cursor()
+     while (top != None):
+          ad = str(top[1].decode("utf-8"))
+          locSearch = re.search('<date>(.*)</date>',ad)
+          loc = locSearch.group(1)
+          if (loc.lower() == name):
+               resultlist.append(ad)
+          top = adCursor.next()
+     return loc_aids     
+
+
 
 def main():
     print("Please enter your query, type exit to quit.")
