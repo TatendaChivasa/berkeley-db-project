@@ -205,6 +205,7 @@ def pricefunct(pr):
             rangesearch(greatpr, lesspr, cursor, priceDB)#commented out the range function       
             
 def date_cat_loc(da,ca,lo):
+    
     date1 = re.compile("date\>\\d{4}\/\d{2}\/\d{2}")
     date2 = re.compile("date\<\\d{4}\/\d{2}\/\d{2}")
     category= re.compile("cat\=[A-Za-z_-]")
@@ -212,33 +213,40 @@ def date_cat_loc(da,ca,lo):
     adDB = db.DB()
     adDB.open('ad.idx',None,db.DB_HASH,db.DB_CREATE)
     cursor = adDB.cursor()
-    
+    record = cursor.first()
+     
     if lo != 0: 
         loc = re.sub('location\=','', lo)
-        record = cursor.first()
-    while (record != None):
-        ad = str(record[1].decode("utf-8"))
-        if ad == None:
-            break
-        findloc = re.search('<loc>(.*)</loc>',ad)
-        location  = findloc.group(1)
-        if (loc == location):
-            found = (str(record[0].decode("utf-8")) + ": " + str(record[1].decode("utf-8")))
-            resultlist.add(found)
-        record = cursor.next()
+       
+    
+        while (record != None):
+            ad = str(record[1].decode("utf-8"))
+            if ad == None:
+                break
+            findloc = re.search('<loc>(.*)</loc>',ad)
+            location  = findloc.group(1)
+            if (loc == location):
+                found = (str(record[0].decode("utf-8")) + ": " + str(record[1].decode("utf-8")))
+                resultlist.add(found)
+            record = cursor.next()
 #getquery()
    
     if da != 0:  
         if (date1.match(da)):
-            greatda=re.sub('date\>','',da)
+            greatda = re.sub('date\>','',da)
            # print("great date",greatda)
+        else: 
+            greatda = None
+            
         if (date2.match(da)):
-            lessda=re.sub('date\<','',da)
+            lessda = re.sub('date\<','',da)
          #   print("less date",lessda)
+        else:
+            lessda = None
     else: 
         greatda = None
         lessda = None        
-    #rangesearch(greatda, lessda, cursor, pdateDB)
+    rangesearch(greatda, lessda, cursor, adDB)
         
     if ca != 0: 
         if(category.match(ca)):
